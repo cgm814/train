@@ -1,4 +1,4 @@
-package com.jiawa.train.member.aspect;
+package com.jiawa.train.common.aspect;
 
 /**
  * Author: 陈桂明
