@@ -1,5 +1,7 @@
 package com.jiawa.train.member.controller;
 
+import com.jiawa.train.common.resp.CommonResp;
+import com.jiawa.train.member.req.MemberRegisterReq;
 import com.jiawa.train.member.service.MemberService;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
@@ -17,12 +19,16 @@ public class MemberController {
     private MemberService memberService;
 
     @GetMapping("/count")
-    public Integer count() {
-        return memberService.count();
+    public CommonResp<Integer> count() {
+        Integer count = memberService.count();
+        CommonResp<Integer> commonResp = new CommonResp<>();
+        commonResp.setContent(count);
+        return commonResp;
     }
 
     @PostMapping("/register")
-    public long register(String mobile) {
-        return memberService.register(mobile);
+    public CommonResp<Long> register(MemberRegisterReq req) {
+        long register = memberService.register(req);
+        return new CommonResp<>(register);
     }
 }
