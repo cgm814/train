@@ -1,13 +1,6 @@
 <template>
     <a-layout id="components-layout-demo-top-side-2">
-        <a-layout-header class="header">
-            <div class="logo" />
-            <a-menu v-model:selectedKeys="selectedKeys1" theme="dark" mode="horizontal" :style="{ lineHeight: '64px' }">
-                <a-menu-item key="1">nav 1</a-menu-item>
-                <a-menu-item key="2">nav 2</a-menu-item>
-                <a-menu-item key="3">nav 3</a-menu-item>
-            </a-menu>
-        </a-layout-header>
+        <the-header-view />
         <a-layout>
             <a-layout-sider width="200" style="background: #fff">
                 <a-menu v-model:selectedKeys="selectedKeys2" v-model:openKeys="openKeys" mode="inline"
@@ -66,15 +59,17 @@
 <script>
 import { UserOutlined, LaptopOutlined, NotificationOutlined } from '@ant-design/icons-vue';
 import { defineComponent, ref } from 'vue';
+import TheHeaderView from '@/components/the-header';
+
 export default defineComponent({
     components: {
+        TheHeaderView,
         UserOutlined,
         LaptopOutlined,
         NotificationOutlined,
     },
     setup() {
         return {
-            selectedKeys1: ref(['2']),
             selectedKeys2: ref(['1']),
             collapsed: ref(false),
             openKeys: ref(['sub1']),
