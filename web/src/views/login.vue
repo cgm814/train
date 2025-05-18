@@ -61,8 +61,8 @@ export default defineComponent({
                 let data = response.data;
                 if (data.success) {
                     notification.success({ description: '登录成功！' });
-                    // 登录成功，跳到控台主页
-                    router.push("/welcome");
+                    // 登录成功，跳到控台主页 
+                    router.push("/");
                     store.commit("setMember", data.content);
                 } else {
                     notification.error({ description: data.message });
