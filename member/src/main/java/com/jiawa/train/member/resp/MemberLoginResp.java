@@ -10,6 +10,8 @@ public class MemberLoginResp {
 
     private String mobile;
 
+    private String token;
+
     public Long getId() {
         return id;
     }
@@ -26,11 +28,20 @@ public class MemberLoginResp {
         this.mobile = mobile;
     }
 
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
+
     @Override
     public String toString() {
         return "MemberLoginResp{" +
                 "id=" + id +
                 ", mobile='" + mobile + '\'' +
+                ", token='" + token + '\'' +
                 '}';
     }
 }

@@ -17,7 +17,7 @@
     </a-layout>
 </template>
 <script>
-import { defineComponent, ref } from 'vue';
+import { defineComponent } from 'vue';
 import TheHeaderView from '@/components/the-header';
 import TheSiderView from '@/components/the-sider';
 
