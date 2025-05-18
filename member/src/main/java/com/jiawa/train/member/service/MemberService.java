@@ -107,7 +107,7 @@ public class MemberService {
         List<Member> list = memberMapper.selectByExample(memberExample);
 
         // 如果手机号不存在
-        if (CollUtil.isNotEmpty(list)) {
+        if (CollUtil.isEmpty(list)) {
             return null;
         } else {
             return list.get(0);
