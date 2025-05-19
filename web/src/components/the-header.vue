@@ -23,8 +23,8 @@ import store from "@/store";
 export default defineComponent({
   name: 'the-header-view',
   setup() {
-    // 正确：通过 useStore() 获取 store 实例
-    console.log("member:", store.state.member);  // 可以正常访问
+    // // 正确：通过 useStore() 获取 store 实例
+    // console.log("member:", store.state.member);  // 可以正常访问
     let member = store.state.member;
     return {
       selectedKeys1: ref(['2']),
