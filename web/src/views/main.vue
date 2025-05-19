@@ -10,14 +10,16 @@
                     <a-breadcrumb-item>App</a-breadcrumb-item>
                 </a-breadcrumb>
                 <a-layout-content :style="{ background: '#fff', padding: '24px', margin: 0, minHeight: '280px' }">
-                    Content
+                    所有会员总数：{{ count }}
                 </a-layout-content>
             </a-layout>
         </a-layout>
     </a-layout>
 </template>
 <script>
-import { defineComponent } from 'vue';
+import { defineComponent, ref } from 'vue';
+import axios from 'axios';
+import { notification } from 'ant-design-vue';
 import TheHeaderView from '@/components/the-header';
 import TheSiderView from '@/components/the-sider';
 
@@ -27,7 +29,18 @@ export default defineComponent({
         TheSiderView,
     },
     setup() {
+        const count = ref(0);
+        axios.get("/member/member/count").then((response) => {
+            let data = response.data;
+            if (data.success) {
+                count.value = data.content;
+            } else {
+                notification.error({ description: data.message });
+            }
+        });
+
         return {
+            count
         };
     },
 });
