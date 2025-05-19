@@ -1,4 +1,4 @@
-package com.jiawa.train.common.util;
+package com.jiawa.train.gateway.util;
 
 import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateTime;
@@ -23,7 +23,7 @@ public class JwtUtil {
 
     public static String createToken(Long id, String mobile) {
         LOG.info("开始生成JWT token，id：{}，mobile：{}", id, mobile);
-        // GlobalBouncyCastleProvider.setUseBouncyCastle(false);
+        GlobalBouncyCastleProvider.setUseBouncyCastle(false);
         DateTime now = DateTime.now();
         DateTime expTime = now.offsetNew(DateField.HOUR, 24);
         Map<String, Object> payload = new HashMap<>();
@@ -57,7 +57,7 @@ public class JwtUtil {
     }
 
     public static JSONObject getJSONObject(String token) {
-        // GlobalBouncyCastleProvider.setUseBouncyCastle(false);
+        GlobalBouncyCastleProvider.setUseBouncyCastle(false);
         JWT jwt = JWTUtil.parseToken(token).setKey(key.getBytes());
         JSONObject payloads = jwt.getPayloads();
         payloads.remove(JWTPayload.ISSUED_AT);
@@ -70,7 +70,7 @@ public class JwtUtil {
     public static void main(String[] args) {
         createToken(1L, "123");
 
-        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJuYmYiOjE3NDc1ODI3ODQsIm1vYmlsZSI6IjEzMDAwMDAwMDAwIiwiaWQiOjE5MjQwMDk5Mzk5NzQ2MjMyMzIsImV4cCI6MTc0NzY2OTE4NCwiaWF0IjoxNzQ3NTgyNzg0fQ.RiQeBTVx0mWNGr1--obMhoUg4PE--KPbnfJ2IB3FYVE";
+        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJuYmYiOjE2NzY4OTk4MjcsIm1vYmlsZSI6IjEyMyIsImlkIjoxLCJleHAiOjE2NzY4OTk4MzcsImlhdCI6MTY3Njg5OTgyN30.JbFfdeNHhxKhAeag63kifw9pgYhnNXISJM5bL6hM8eU";
         validate(token);
 
         getJSONObject(token);
