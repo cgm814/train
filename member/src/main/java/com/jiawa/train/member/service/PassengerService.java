@@ -2,13 +2,21 @@ package com.jiawa.train.member.service;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DateTime;
+import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.StrUtil;
 import com.jiawa.train.common.context.LoginMemberContext;
 import com.jiawa.train.common.util.SnowUtil;
 import com.jiawa.train.member.domain.Passenger;
+import com.jiawa.train.member.domain.PassengerExample;
 import com.jiawa.train.member.mapper.PassengerMapper;
+import com.jiawa.train.member.req.PassengerQueryReq;
 import com.jiawa.train.member.req.PassengerSaveReq;
+import com.jiawa.train.member.resp.PassengerQueryResp;
+import com.mysql.cj.util.StringUtils;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * Author: 陈桂明
@@ -30,5 +38,17 @@ public class PassengerService {
         passenger.setUpdateTime(now);
 
         passengerMapper.insert(passenger);
+    }
+
+    public List<PassengerQueryResp> queryList(PassengerQueryReq req) {
+        PassengerExample passengerExample = new PassengerExample();
+        PassengerExample.Criteria criteria = passengerExample.createCriteria();
+
+        Long memberId = req.getMemberId();
+        if (ObjectUtil.isNotNull(memberId)) {
+            criteria.andMemberIdEqualTo(memberId);
+        }
+        List<Passenger> passengerList = passengerMapper.selectByExample(passengerExample);
+        return BeanUtil.copyToList(passengerList, PassengerQueryResp.class);
     }
 }
