@@ -49,11 +49,12 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   // 要不要对meta.loginRequire属性做监控拦截
   if (to.matched.some(function (item) {
-    console.log(item, "是否需要登录校验：", item.meta.loginRequire || false);
+    console.log("是否需要登录校验：", item.meta.loginRequire || false);
     return item.meta.loginRequire
   })) {
     const _member = store.state.member;
     console.log("页面登录校验开始：", _member);
+    console.log("token: ",_member.token);
     if (!_member.token) {
       console.log("用户未登录或登录超时！");
       notification.error({ description: "未登录或登录超时" });
