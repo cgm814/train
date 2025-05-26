@@ -1,11 +1,16 @@
 package com.jiawa.train.member.resp;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+
 /**
  * Author: 陈桂明
  * Date: 2025/5/18 14:41
  * Description: MemberLoginResp
  */
 public class MemberLoginResp {
+
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long id;
 
     private String mobile;
