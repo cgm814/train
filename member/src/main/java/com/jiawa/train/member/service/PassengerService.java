@@ -70,4 +70,9 @@ public class PassengerService {
 
         return resp;
     }
+
+
+    public void delete(Long id) {
+        passengerMapper.deleteByPrimaryKey(id);
+    }
 }
