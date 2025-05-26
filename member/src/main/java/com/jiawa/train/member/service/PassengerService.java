@@ -5,7 +5,9 @@ import cn.hutool.core.date.DateTime;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import com.jiawa.train.common.context.LoginMemberContext;
+import com.jiawa.train.common.resp.PageResp;
 import com.jiawa.train.common.util.SnowUtil;
 import com.jiawa.train.member.domain.Passenger;
 import com.jiawa.train.member.domain.PassengerExample;
@@ -41,7 +43,7 @@ public class PassengerService {
         passengerMapper.insert(passenger);
     }
 
-    public List<PassengerQueryResp> queryList(PassengerQueryReq req) {
+    public PageResp<PassengerQueryResp> queryList(PassengerQueryReq req) {
         PassengerExample passengerExample = new PassengerExample();
         PassengerExample.Criteria criteria = passengerExample.createCriteria();
 
@@ -49,8 +51,16 @@ public class PassengerService {
         if (ObjectUtil.isNotNull(memberId)) {
             criteria.andMemberIdEqualTo(memberId);
         }
-        PageHelper.startPage(1, 2);
+        PageHelper.startPage(req.getPage(), req.getSize());
         List<Passenger> passengerList = passengerMapper.selectByExample(passengerExample);
-        return BeanUtil.copyToList(passengerList, PassengerQueryResp.class);
+
+        PageInfo<Passenger> pageInfo = new PageInfo<>(passengerList);
+
+        List<PassengerQueryResp> list = BeanUtil.copyToList(passengerList, PassengerQueryResp.class);
+        PageResp<PassengerQueryResp> resp = new PageResp<>();
+        resp.setTotal(pageInfo.getTotal());
+        resp.setList(list);
+
+        return resp;
     }
 }
