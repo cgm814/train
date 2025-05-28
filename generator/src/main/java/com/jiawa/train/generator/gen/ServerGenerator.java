@@ -1,4 +1,4 @@
-package com.jiawa.train.generator.server;
+package com.jiawa.train.generator.gen;
 
 import com.jiawa.train.generator.util.DbUtil;
 import com.jiawa.train.generator.util.Field;
