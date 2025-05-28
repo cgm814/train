@@ -97,8 +97,8 @@ public class ServerGenerator {
 
     private static void genVue(String do_main, Map<String, Object> param) throws IOException, TemplateException {
         FreemarkerUtil.initConfig("vue.ftl");
-        new File(vuePath).mkdirs();
-        String fileName = vuePath + "/" + do_main + ".vue";
+        new File(vuePath + module).mkdirs();
+        String fileName = vuePath + module + "/" + do_main + ".vue";
         System.out.println("开始生成：" + fileName);
         FreemarkerUtil.generator(fileName, param);
     }
