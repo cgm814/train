@@ -1,4 +1,4 @@
-package com.jiawa.train.generator.server;
+package com.jiawa.train.generator.gen;
 
 import com.jiawa.train.generator.util.DbUtil;
 import com.jiawa.train.generator.util.Field;
@@ -11,32 +11,26 @@ import org.dom4j.io.SAXReader;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
-/**
- * Author: 陈桂明
- * Date: 2025/5/27 15:36
- * Description: ServerGenerator
- */
 public class ServerGenerator {
+    static boolean readOnly = false;
+    static String vuePath = "admin/src/views/main/";
     static String serverPath = "[module]/src/main/java/com/jiawa/train/[module]/";
     static String pomPath = "generator/pom.xml";
-
-    static {
-        new File(serverPath).mkdirs();
-    }
+    static String module = "";
+    // static {
+    //     new File(serverPath).mkdirs();
+    // }
 
     public static void main(String[] args) throws Exception {
         // 获取mybatis-generator
         String generatorPath = getGeneratorPath();
         // 比如generator-config-member.xml，得到module = member
-        String module = generatorPath.replace("src/main/resources/generator-config-", "").replace(".xml", "");
+        module = generatorPath.replace("src/main/resources/generator-config-", "").replace(".xml", "");
         System.out.println("module: " + module);
         serverPath = serverPath.replace("[module]", module);
-        // new File(servicePath).mkdirs();
+        new File(serverPath).mkdirs();
         System.out.println("servicePath: " + serverPath);
 
         // 读取table节点
@@ -68,21 +62,32 @@ public class ServerGenerator {
         // 表中文名
         String tableNameCn = DbUtil.getTableComment(tableName.getText());
         List<Field> fieldList = DbUtil.getColumnByTableName(tableName.getText());
+        Set<String> typeSet = getJavaTypes(fieldList);
 
         // 组装参数
         Map<String, Object> param = new HashMap<>();
+        param.put("module", module);
         param.put("Domain", Domain);
         param.put("domain", domain);
         param.put("do_main", do_main);
+        param.put("tableNameCn", tableNameCn);
+        param.put("fieldList", fieldList);
+        param.put("typeSet", typeSet);
+        param.put("readOnly", readOnly);
         System.out.println("组装参数：" + param);
 
-        gen(Domain, param, "service");
-        gen(Domain, param, "controller");
+        // gen(Domain, param, "service", "service");
+        // gen(Domain, param, "controller/admin", "adminController");
+        gen(Domain, param, "req", "saveReq");
+        // gen(Domain, param, "req", "queryReq");
+        // gen(Domain, param, "resp", "queryResp");
+
+        // genVue(do_main, param);
     }
 
-    private static void gen(String Domain, Map<String, Object> param, String target) throws IOException, TemplateException {
+    private static void gen(String Domain, Map<String, Object> param, String packageName, String target) throws IOException, TemplateException {
         FreemarkerUtil.initConfig(target + ".ftl");
-        String toPath = serverPath + target + "/";
+        String toPath = serverPath + packageName + "/";
         new File(toPath).mkdirs();
         String Target = target.substring(0, 1).toUpperCase() + target.substring(1);
         String fileName = toPath + Domain + Target + ".java";
@@ -90,13 +95,34 @@ public class ServerGenerator {
         FreemarkerUtil.generator(fileName, param);
     }
 
+    private static void genVue(String do_main, Map<String, Object> param) throws IOException, TemplateException {
+        FreemarkerUtil.initConfig("vue.ftl");
+        new File(vuePath + module).mkdirs();
+        String fileName = vuePath + module + "/" + do_main + ".vue";
+        System.out.println("开始生成：" + fileName);
+        FreemarkerUtil.generator(fileName, param);
+    }
+
     private static String getGeneratorPath() throws DocumentException {
         SAXReader saxReader = new SAXReader();
-        HashMap<String, String> map = new HashMap<>();
+        Map<String, String> map = new HashMap<String, String>();
         map.put("pom", "http://maven.apache.org/POM/4.0.0");
         saxReader.getDocumentFactory().setXPathNamespaceURIs(map);
         Document document = saxReader.read(pomPath);
         Node node = document.selectSingleNode("//pom:configurationFile");
+        System.out.println(node.getText());
         return node.getText();
+    }
+
+    /**
+     * 获取所有的Java类型，使用Set去重
+     */
+    private static Set<String> getJavaTypes(List<Field> fieldList) {
+        Set<String> set = new HashSet<>();
+        for (int i = 0; i < fieldList.size(); i++) {
+            Field field = fieldList.get(i);
+            set.add(field.getJavaType());
+        }
+        return set;
     }
 }
