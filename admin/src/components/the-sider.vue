@@ -79,8 +79,8 @@
             基础数据
           </span>
         </template>
-        <a-menu-item key="/base/station">
-          <router-link to="/base/station">
+        <a-menu-item key="/station">
+          <router-link to="/station">
             <MenuUnfoldOutlined /> &nbsp; 车站管理
           </router-link>
         </a-menu-item>
