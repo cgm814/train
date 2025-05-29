@@ -95,8 +95,8 @@
             <MenuUnfoldOutlined/> &nbsp; 火车车站
           </router-link>
         </a-menu-item>
-        <a-menu-item key="/base/train-carriage">
-          <router-link to="/base/train-carriage">
+        <a-menu-item key="/train-carriage">
+          <router-link to="/train-carriage">
             <MenuUnfoldOutlined/> &nbsp; 火车车厢
           </router-link>
         </a-menu-item>
