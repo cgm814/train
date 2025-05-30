@@ -71,7 +71,7 @@ public class TrainService {
 
     public List<TrainQueryResp> queryAll() {
         TrainExample trainExample = new TrainExample();
-        trainExample.setOrderByClause("code desc");
+        trainExample.setOrderByClause("code");
         List<Train> trains = trainMapper.selectByExample(trainExample);
         return BeanUtil.copyToList(trains, TrainQueryResp.class);
     }
