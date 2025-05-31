@@ -42,4 +42,16 @@ public class StationAdminController {
         stationService.delete(id);
         return new CommonResp<>();
     }
+
+
+    /**
+     * 查询所有车站
+     *
+     * @return
+     */
+    @GetMapping("/query-all")
+    public CommonResp<List<StationQueryResp>> queryList() {
+        List<StationQueryResp> list = stationService.queryAll();
+        return new CommonResp<>(list);
+    }
 }
