@@ -71,4 +71,18 @@ public class TrainCarriageService {
     public void delete(Long id) {
         trainCarriageMapper.deleteByPrimaryKey(id);
     }
+
+
+    /**
+     * 根据车次查询所有车厢
+     *
+     * @param trainCode
+     * @return
+     */
+    public List<TrainCarriage> selectByTrainCode(String trainCode) {
+        TrainCarriageExample trainCarriageExample = new TrainCarriageExample();
+        trainCarriageExample.setOrderByClause("`index`");
+        trainCarriageExample.createCriteria().andTrainCodeEqualTo(trainCode);
+        return trainCarriageMapper.selectByExample(trainCarriageExample);
+    }
 }

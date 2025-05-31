@@ -3,7 +3,7 @@ Accept: application/json
 
 ###
 
-GET http://localhost:8000/business/admin/train/gen-seat/G1
+GET http://localhost:8000/business/admin/train/gen-seat/G2
 Accept: application/json
 
 ###
