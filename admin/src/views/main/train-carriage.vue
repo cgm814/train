@@ -1,7 +1,8 @@
 <template>
   <p>
     <a-space>
-      <a-button type="primary" @click="handleQuery()">刷新</a-button>
+      <train-select-view v-model="params.trainCode" width="200px"></train-select-view>
+      <a-button type="primary" @click="handleQuery()">查找</a-button>
       <a-button type="primary" @click="onAdd">新增</a-button>
     </a-space>
   </p>
@@ -25,7 +26,7 @@
       <template v-else-if="column.dataIndex === 'seatType'">
         <span v-for="item in SEAT_TYPE_ARRAY" :key="item.code">
           <span v-if="item.code === record.seatType">
-            {{item.desc}}
+            {{ item.desc }}
           </span>
         </span>
       </template>
@@ -38,30 +39,30 @@
         <train-select-view v-model="trainCarriage.trainCode"></train-select-view>
       </a-form-item>
       <a-form-item label="厢号">
-        <a-input v-model:value="trainCarriage.index" />
+        <a-input v-model:value="trainCarriage.index"/>
       </a-form-item>
       <a-form-item label="座位类型">
         <a-select v-model:value="trainCarriage.seatType">
           <a-select-option v-for="item in SEAT_TYPE_ARRAY" :key="item.code" :value="item.code">
-            {{item.desc}}
+            {{ item.desc }}
           </a-select-option>
         </a-select>
       </a-form-item>
       <a-form-item label="座位数">
-        <a-input v-model:value="trainCarriage.seatCount" />
+        <a-input v-model:value="trainCarriage.seatCount"/>
       </a-form-item>
       <a-form-item label="排数">
-        <a-input v-model:value="trainCarriage.rowCount" />
+        <a-input v-model:value="trainCarriage.rowCount"/>
       </a-form-item>
       <a-form-item label="列数">
-        <a-input v-model:value="trainCarriage.colCount" />
+        <a-input v-model:value="trainCarriage.colCount"/>
       </a-form-item>
     </a-form>
   </a-modal>
 </template>
 
 <script>
-import { defineComponent, ref, onMounted } from 'vue';
+import {defineComponent, ref, onMounted} from 'vue';
 import {notification} from "ant-design-vue";
 import axios from "axios";
 import TrainSelectView from "@/components/train-select";
@@ -91,41 +92,44 @@ export default defineComponent({
       pageSize: 10,
     });
     let loading = ref(false);
+    let params = ref({
+      trainCode: null
+    });
     const columns = [
-    {
-      title: '车次编号',
-      dataIndex: 'trainCode',
-      key: 'trainCode',
-    },
-    {
-      title: '厢号',
-      dataIndex: 'index',
-      key: 'index',
-    },
-    {
-      title: '座位类型',
-      dataIndex: 'seatType',
-      key: 'seatType',
-    },
-    {
-      title: '座位数',
-      dataIndex: 'seatCount',
-      key: 'seatCount',
-    },
-    {
-      title: '排数',
-      dataIndex: 'rowCount',
-      key: 'rowCount',
-    },
-    {
-      title: '列数',
-      dataIndex: 'colCount',
-      key: 'colCount',
-    },
-    {
-      title: '操作',
-      dataIndex: 'operation'
-    }
+      {
+        title: '车次编号',
+        dataIndex: 'trainCode',
+        key: 'trainCode',
+      },
+      {
+        title: '厢号',
+        dataIndex: 'index',
+        key: 'index',
+      },
+      {
+        title: '座位类型',
+        dataIndex: 'seatType',
+        key: 'seatType',
+      },
+      {
+        title: '座位数',
+        dataIndex: 'seatCount',
+        key: 'seatCount',
+      },
+      {
+        title: '排数',
+        dataIndex: 'rowCount',
+        key: 'rowCount',
+      },
+      {
+        title: '列数',
+        dataIndex: 'colCount',
+        key: 'colCount',
+      },
+      {
+        title: '操作',
+        dataIndex: 'operation'
+      }
     ];
 
     const onAdd = () => {
@@ -180,7 +184,8 @@ export default defineComponent({
       axios.get("/business/admin/train-carriage/query-list", {
         params: {
           page: param.page,
-          size: param.size
+          size: param.size,
+          trainCode: params.value.trainCode
         }
       }).then((response) => {
         loading.value = false;
@@ -225,7 +230,8 @@ export default defineComponent({
       onAdd,
       handleOk,
       onEdit,
-      onDelete
+      onDelete,
+      params,
     };
   },
 });
