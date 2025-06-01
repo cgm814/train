@@ -1,10 +1,15 @@
 package com.jiawa.train.business.service;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.util.ObjectUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.jiawa.train.business.domain.TrainCarriage;
+import com.jiawa.train.business.domain.TrainCarriageExample;
+import com.jiawa.train.common.exception.BusinessException;
+import com.jiawa.train.common.exception.BusinessExceptionEnum;
 import com.jiawa.train.common.resp.PageResp;
 import com.jiawa.train.common.util.SnowUtil;
 import com.jiawa.train.business.domain.Train;
@@ -32,6 +37,12 @@ public class TrainService {
         DateTime now = DateTime.now();
         Train train = BeanUtil.copyProperties(req, Train.class);
         if (ObjectUtil.isNull(train.getId())) {
+            // 校验唯一性
+            Train trainDB = selectByUnique(req.getCode());
+            if (ObjectUtil.isNotNull(trainDB)) {
+                throw new BusinessException(BusinessExceptionEnum.BUSINESS_TRAIN_CODE_UNIQUE_ERROR);
+            }
+
             train.setId(SnowUtil.getSnowflakeNextId());
             train.setCreateTime(now);
             train.setUpdateTime(now);
@@ -74,5 +85,22 @@ public class TrainService {
         trainExample.setOrderByClause("code");
         List<Train> trains = trainMapper.selectByExample(trainExample);
         return BeanUtil.copyToList(trains, TrainQueryResp.class);
+    }
+
+
+    /**
+     * 根据唯一键查询车次
+     *
+     * @param trainCode
+     * @return
+     */
+    private Train selectByUnique(String trainCode) {
+        TrainExample trainExample = new TrainExample();
+        trainExample.createCriteria().andCodeEqualTo(trainCode);
+        List<Train> list = trainMapper.selectByExample(trainExample);
+        if (CollUtil.isNotEmpty(list)) {
+            return list.get(0);
+        }
+        return null;
     }
 }
