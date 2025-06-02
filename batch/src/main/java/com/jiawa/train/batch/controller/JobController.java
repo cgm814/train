@@ -30,6 +30,23 @@ public class JobController {
 
 
     /**
+     * 手动执行任务
+     *
+     * @param cronJobReq
+     * @return
+     * @throws SchedulerException
+     */
+    @RequestMapping(value = "/run")
+    public CommonResp<Object> run(@RequestBody CronJobReq cronJobReq) throws SchedulerException {
+        String jobClassName = cronJobReq.getName();
+        String jobGroupName = cronJobReq.getGroup();
+        LOG.info("手动执行任务开始：{}, {}", jobClassName, jobGroupName);
+        schedulerFactoryBean.getScheduler().triggerJob(JobKey.jobKey(jobClassName, jobGroupName));
+        return new CommonResp<>();
+    }
+
+
+    /**
      * 创建定时任务
      *
      * @param cronJobReq
