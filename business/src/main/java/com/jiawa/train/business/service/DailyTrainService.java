@@ -3,6 +3,7 @@ package com.jiawa.train.business.service;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.StrUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.jiawa.train.common.resp.PageResp;
@@ -46,6 +47,12 @@ public class DailyTrainService {
         DailyTrainExample dailyTrainExample = new DailyTrainExample();
         dailyTrainExample.setOrderByClause("id desc");
         DailyTrainExample.Criteria criteria = dailyTrainExample.createCriteria();
+        if (ObjectUtil.isNotNull(req.getDate())) {
+            criteria.andDateEqualTo(req.getDate());
+        }
+        if (StrUtil.isNotEmpty(req.getCode())) {
+            criteria.andCodeEqualTo(req.getCode());
+        }
 
         LOG.info("查询页码：{}", req.getPage());
         LOG.info("每页条数：{}", req.getSize());
