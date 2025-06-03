@@ -1,6 +1,7 @@
 package com.jiawa.train.business.req;
 
 import java.util.Date;
+
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import jakarta.validation.constraints.NotBlank;
@@ -16,7 +17,7 @@ public class DailyTrainCarriageSaveReq {
     /**
      * 日期
      */
-    @JsonFormat(pattern = "yyyy-MM-dd",timezone = "GMT+8")
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     @NotNull(message = "【日期】不能为空")
     private Date date;
 
@@ -41,7 +42,6 @@ public class DailyTrainCarriageSaveReq {
     /**
      * 座位数
      */
-    @NotNull(message = "【座位数】不能为空")
     private Integer seatCount;
 
     /**
@@ -53,19 +53,18 @@ public class DailyTrainCarriageSaveReq {
     /**
      * 列数
      */
-    @NotNull(message = "【列数】不能为空")
     private Integer colCount;
 
     /**
      * 新增时间
      */
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone = "GMT+8")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date createTime;
 
     /**
      * 修改时间
      */
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone = "GMT+8")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date updateTime;
 
     public Long getId() {
