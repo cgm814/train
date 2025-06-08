@@ -21,6 +21,7 @@ import jakarta.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
@@ -45,6 +46,9 @@ public class DailyTrainService {
     @Resource
     private DailyTrainSeatService dailyTrainSeatService;
 
+    @Resource
+    private DailyTrainTicketService dailyTrainTicketService;
+
     public void save(DailyTrainSaveReq req) {
         DateTime now = DateTime.now();
         DailyTrain dailyTrain = BeanUtil.copyProperties(req, DailyTrain.class);
@@ -61,7 +65,7 @@ public class DailyTrainService {
 
     public PageResp<DailyTrainQueryResp> queryList(DailyTrainQueryReq req) {
         DailyTrainExample dailyTrainExample = new DailyTrainExample();
-        dailyTrainExample.setOrderByClause("id desc");
+        dailyTrainExample.setOrderByClause("date desc, code asc");
         DailyTrainExample.Criteria criteria = dailyTrainExample.createCriteria();
         if (ObjectUtil.isNotNull(req.getDate())) {
             criteria.andDateEqualTo(req.getDate());
@@ -97,6 +101,7 @@ public class DailyTrainService {
      *
      * @param date
      */
+    @Transactional
     public void genDaily(Date date) {
         List<Train> trainList = trainService.selectAll();
         if (CollUtil.isEmpty(trainList)) {
@@ -110,6 +115,7 @@ public class DailyTrainService {
     }
 
 
+    @Transactional
     public void genDailyTrain(Date date, Train train) {
         LOG.info("开始生成日期【{}】车次【{}】的信息开始", DateUtil.formatDate(date), train.getCode());
         // 删除该车次数据已有的数据
@@ -136,6 +142,9 @@ public class DailyTrainService {
 
         // 生成该车次这天的座位信息数据
         dailyTrainSeatService.genDaily(date, train.getCode());
+
+        // 生成该车次这天的余票信息数据
+        dailyTrainTicketService.genDaily(date, train.getCode());
 
         LOG.info("开始生成日期【{}】车次【{}】的信息结束", DateUtil.formatDate(date), train.getCode());
     }
