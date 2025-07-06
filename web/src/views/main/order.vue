@@ -57,7 +57,7 @@
   <a-modal v-model:visible="visible" title="请核对以下信息"
            style="top: 50px; width: 800px"
            ok-text="确认" cancel-text="取消"
-           @ok="showFirstImageCodeModal">
+           @ok="handleOk">
     <div class="order-tickets">
       <a-row class="order-tickets-header" v-if="tickets.length > 0">
         <a-col :span="3">乘客</a-col>
@@ -105,16 +105,16 @@
         体验排队购票，加入多人一起排队购票：
         <a-input-number v-model:value="lineNumber" :min="0" :max="20"/>
       </div>
-      <!--<br/>-->
-      <!--最终购票：{{tickets}}-->
-      <!--最终选座：{{chooseSeatObj}}-->
+      <br/>
+      最终购票：{{ tickets }}
+      最终选座：{{ chooseSeatObj }}
     </div>
   </a-modal>
 </template>
 
 <script>
 
-import {defineComponent, ref, onMounted, watch} from "vue";
+import {defineComponent, ref, onMounted, watch, computed} from "vue";
 import axios from "axios";
 import {notification} from "ant-design-vue";
 
@@ -183,6 +183,28 @@ export default defineComponent({
       }))
     }, {immediate: true});
 
+    // 0：不支持选座；1：选一等座；2：选二等座
+    const chooseSeatType = ref(0);
+    // 根据选择的座位类型，计算出对应的列，比如要选的是一等座，就筛选出ACDF，要选的是二等座，就筛选出ABCDF
+    const SEAT_COL_ARRAY = computed(() => {
+      return window.SEAT_COL_ARRAY.filter(item => item.type === chooseSeatType.value);
+    });
+    // 选择的座位
+    // {
+    //   A1: false, C1: true，D1: false, F1: false，
+    //   A2: false, C2: false，D2: true, F2: false
+    // }
+    const chooseSeatObj = ref({});
+    watch(() => SEAT_COL_ARRAY.value, () => {
+      chooseSeatObj.value = {};
+      for (let i = 1; i <= 2; i++) {
+        SEAT_COL_ARRAY.value.forEach((item) => {
+          chooseSeatObj.value[item.code + i] = false;
+        })
+      }
+      console.log("初始化两排座位，都是未选中：", chooseSeatObj.value);
+    }, {immediate: true});
+
     const handleQueryPassenger = () => {
       axios.get("/member/passenger/query-mine").then((response) => {
         let data = response.data;
@@ -206,8 +228,129 @@ export default defineComponent({
         return;
       }
 
+      // 校验余票是否充足，购票列表中的每个座位类型，都去车次座位余票信息中，看余票是否充足
+      // 前端校验不一定准，但前端校验可以减轻后端很多压力
+      // 注意：这段只是校验，必须copy出seatTypesTemp变量来扣减，用原始的seatTypes去扣减，会影响真实的库存
+      let seatTypesTemp = Tool.copy(seatTypes);
+      for (let i = 0; i < tickets.value.length; i++) {
+        let ticket = tickets.value[i];
+        for (let j = 0; j < seatTypesTemp.length; j++) {
+          let seatType = seatTypesTemp[j];
+          // 同类型座位余票-1，这里扣减的是临时copy出来的库存，不是真正的库存，只是为了校验
+          if (ticket.seatTypeCode === seatType.code) {
+            seatType.count--;
+            if (seatType.count < 0) {
+              notification.error({description: seatType.desc + '余票不足'});
+              return;
+            }
+          }
+        }
+      }
+      console.log("前端余票校验通过");
+
+      // 判断是否支持选座，只有纯一等座和纯二等座支持选座
+      // 先筛选出购票列表中的所有座位类型，比如四张表：[1, 1, 2, 2]
+      let ticketSeatTypeCodes = [];
+      for (let i = 0; i < tickets.value.length; i++) {
+        let ticket = tickets.value[i];
+        ticketSeatTypeCodes.push(ticket.seatTypeCode);
+      }
+      // 为购票列表中的所有座位类型去重：[1, 2]
+      const ticketSeatTypeCodesSet = Array.from(new Set(ticketSeatTypeCodes));
+      console.log("选好的座位类型：", ticketSeatTypeCodesSet);
+      if (ticketSeatTypeCodesSet.length !== 1) {
+        console.log("选了多种座位，不支持选座");
+        chooseSeatType.value = 0;
+      } else {
+        // ticketSeatTypeCodesSet.length === 1，即只选择了一种座位（不是一个座位，是一种座位）
+        if (ticketSeatTypeCodesSet[0] === SEAT_TYPE.YDZ.code) {
+          console.log("一等座选座");
+          chooseSeatType.value = SEAT_TYPE.YDZ.code;
+        } else if (ticketSeatTypeCodesSet[0] === SEAT_TYPE.EDZ.code) {
+          console.log("二等座选座");
+          chooseSeatType.value = SEAT_TYPE.EDZ.code;
+        } else {
+          console.log("不是一等座或二等座，不支持选座");
+          chooseSeatType.value = 0;
+        }
+
+        // 余票小于20张时，不允许选座，否则选座成功率不高，影响出票
+        if (chooseSeatType.value !== 0) {
+          for (let i = 0; i < seatTypes.length; i++) {
+            let seatType = seatTypes[i];
+            // 找到同类型座位
+            if (ticketSeatTypeCodesSet[0] === seatType.code) {
+              // 判断余票，小于20张就不支持选座
+              if (seatType.count < 20) {
+                console.log("余票小于20张就不支持选座")
+                chooseSeatType.value = 0;
+                break;
+              }
+            }
+          }
+        }
+      }
+
+      // 弹出确认界面
       visible.value = true;
     };
+
+    const handleOk = () => {
+      if (Tool.isEmpty(imageCode.value)) {
+        notification.error({description: '验证码不能为空'});
+        return;
+      }
+
+      console.log("选好的座位：", chooseSeatObj.value);
+
+      // 设置每张票的座位
+      // 先清空购票列表的座位，有可能之前选了并设置座位了，但选座数不对被拦截了，又重新选一遍
+      for (let i = 0; i < tickets.value.length; i++) {
+        tickets.value[i].seat = null;
+      }
+      let i = -1;
+      // 要么不选座位，要么所选座位应该等于购票数，即i === (tickets.value.length - 1)
+      for (let key in chooseSeatObj.value) {
+        if (chooseSeatObj.value[key]) {
+          i++;
+          if (i > tickets.value.length - 1) {
+            notification.error({description: '所选座位数大于购票数'});
+            return;
+          }
+          tickets.value[i].seat = key;
+        }
+      }
+      if (i > -1 && i < (tickets.value.length - 1)) {
+        notification.error({description: '所选座位数小于购票数'});
+        return;
+      }
+
+      console.log("最终购票：", tickets.value);
+
+      // axios.post("/business/confirm-order/do", {
+      //   dailyTrainTicketId: dailyTrainTicket.id,
+      //   date: dailyTrainTicket.date,
+      //   trainCode: dailyTrainTicket.trainCode,
+      //   start: dailyTrainTicket.start,
+      //   end: dailyTrainTicket.end,
+      //   tickets: tickets.value,
+      //   imageCodeToken: imageCodeToken.value,
+      //   imageCode: imageCode.value,
+      //   lineNumber: lineNumber.value
+      // }).then((response) => {
+      //   let data = response.data;
+      //   if (data.success) {
+      //     // notification.success({description: "下单成功！"});
+      //     visible.value = false;
+      //     imageCodeModalVisible.value = false;
+      //     lineModalVisible.value = true;
+      //     confirmOrderId.value = data.content;
+      //     queryLineCount();
+      //   } else {
+      //     notification.error({description: data.message});
+      //   }
+      // });
+    }
 
     onMounted(() => {
       handleQueryPassenger();
@@ -223,6 +366,10 @@ export default defineComponent({
       PASSENGER_TYPE_ARRAY,
       visible,
       finishCheckPassenger,
+      chooseSeatType,
+      chooseSeatObj,
+      SEAT_COL_ARRAY,
+      handleOk,
     };
   }
 })
