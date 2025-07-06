@@ -64,4 +64,15 @@ public class PassengerController {
         passengerService.delete(id);
         return new CommonResp<>();
     }
+
+    /**
+     * 查询我的乘客信息
+     *
+     * @return
+     */
+    @GetMapping("/query-mine")
+    public CommonResp<List<PassengerQueryResp>> queryMine() {
+        List<PassengerQueryResp> list = passengerService.queryMine();
+        return new CommonResp<>(list);
+    }
 }
