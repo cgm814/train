@@ -3,8 +3,11 @@ package com.jiawa.train.business.service;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.util.ObjectUtil;
+import com.alibaba.fastjson.JSON;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.jiawa.train.business.enums.ConfirmOrderStatusEnum;
+import com.jiawa.train.common.context.LoginMemberContext;
 import com.jiawa.train.common.resp.PageResp;
 import com.jiawa.train.common.util.SnowUtil;
 import com.jiawa.train.business.domain.ConfirmOrder;
@@ -73,6 +76,20 @@ public class ConfirmOrderService {
         // 省略业务数据校验，如：车次是否存在，余票是否存在，车次是否在有效期内，tickets条数>0，同乘客同车次是否已经买过
 
         // 保存确认订单，初始状态
+        DateTime now = DateTime.now();
+        ConfirmOrder confirmOrder = new ConfirmOrder();
+        confirmOrder.setId(SnowUtil.getSnowflakeNextId());
+        confirmOrder.setMemberId(LoginMemberContext.getId());
+        confirmOrder.setDate(req.getDate());
+        confirmOrder.setTrainCode(req.getTrainCode());
+        confirmOrder.setStart(req.getStart());
+        confirmOrder.setEnd(req.getEnd());
+        confirmOrder.setDailyTrainTicketId(req.getDailyTrainTicketId());
+        confirmOrder.setStatus(ConfirmOrderStatusEnum.INIT.getCode());
+        confirmOrder.setCreateTime(now);
+        confirmOrder.setUpdateTime(now);
+        confirmOrder.setTickets(JSON.toJSONString(req.getTickets()));
+        confirmOrderMapper.insert(confirmOrder);
 
         // 查出余票记录，需要得到真实的库存
 
