@@ -43,7 +43,7 @@
 
         <!-- 选择表-->
         <!--        <table tableName="member" domainObjectName="Member"/>-->
-        <table tableName="passenger" domainObjectName="Passenger"/>
-        <!--<table tableName="ticket" domainObjectName="Ticket"/>-->
+        <!--        <table tableName="passenger" domainObjectName="Passenger"/>-->
+        <table tableName="ticket" domainObjectName="Ticket"/>
     </context>
 </generatorConfiguration>
