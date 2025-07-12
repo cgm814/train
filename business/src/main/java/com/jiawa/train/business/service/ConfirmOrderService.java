@@ -51,6 +51,9 @@ public class ConfirmOrderService {
     @Resource
     private DailyTrainSeatService dailyTrainSeatService;
 
+    @Resource
+    private AfterConfirmOrderService afterConfirmOrderService;
+
 
     public void save(ConfirmOrderDoReq req) {
         DateTime now = DateTime.now();
@@ -172,22 +175,18 @@ public class ConfirmOrderService {
 
         LOG.info("最终选座：{}", finalSeatList);
 
-        // 选座
-
-            // 一个车厢一个车厢的获取座位数据
-
-            // 挑选符合条件的座位，如果这个车厢不满足，则进入下个车厢（多个座位应该在同一个车厢）
-
         // 选中座位后事务处理：
             // 座位表修改售卖情况sell；
             // 余票详情表修改余票；
             // 为会员增加购票记录；
             // 更新确定订单为成功；
+        afterConfirmOrderService.afterDoConfirm(dailyTrainTicket, finalSeatList);
     }
 
 
     /**
      * 挑座位，如果有选座，则一次性挑完，如果无选座，则一个一个挑
+     *
      * @param date
      * @param trainCode
      * @param seatType
@@ -212,7 +211,7 @@ public class ConfirmOrderService {
 
                 // 判断当前座位不能被选中过
                 boolean alreadyChooseFlag = false;
-                for (DailyTrainSeat finalSeat : finalSeatList){
+                for (DailyTrainSeat finalSeat : finalSeatList) {
                     if (finalSeat.getId().equals(dailyTrainSeat.getId())) {
                         alreadyChooseFlag = true;
                         break;
@@ -235,10 +234,10 @@ public class ConfirmOrderService {
                 }
 
                 boolean isChoose = calSell(dailyTrainSeat, startIndex, endIndex);
-                if (isChoose){
+                if (isChoose) {
                     LOG.info("选中座位");
                     getSeatList.add(dailyTrainSeat);
-                }else {
+                } else {
                     // LOG.info("未选中座位");
                     continue;
                 }
@@ -290,7 +289,7 @@ public class ConfirmOrderService {
      * 计算某座位在区间内是否可卖
      * 例：sell=10001，本次购买区间站1~4，则区间已售000
      * 全部是0，表示这个区间可买；只要有1，就表示区间内已售过票
-     *
+     * <p>
      * 选中后，要计算购票后的sell，比如原来是10001，本次购买区间站1~4
      * 方案：构造本次购票造成的售卖信息01110，和原sell 10001按位与，最终得到11111
      */
